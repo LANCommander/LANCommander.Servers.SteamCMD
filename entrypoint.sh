@@ -10,13 +10,14 @@ STEAMCMD_BIN="/opt/steamcmd/steamcmd.sh"
 : "${OVERLAY_DIR:=/config/overlay}"
 : "${GAME_DIR:=/config/game}"
 : "${MERGED_DIR:=/config/merged}"
+: "${HOOK_DIR:=/config/hooks}"
 : "${STEAM_APP_ID:=}"
 : "${STEAM_APP_UPDATE:=true}"
 : "${STEAM_BETA:=}"
 : "${STEAMCMD_ARGS:=}"
 
 ensure_dirs() {
-  mkdir -p "${CONFIG_DIR}" "${OVERLAY_DIR}" "${GAME_DIR}" "${MERGED_DIR}"
+  mkdir -p "${CONFIG_DIR}" "${OVERLAY_DIR}" "${GAME_DIR}" "${MERGED_DIR}" "${HOOK_DIR}"
 }
 
 setup_overlayfs() {
@@ -53,6 +54,43 @@ setup_overlayfs() {
   fi
 }
 
+run_hooks() {
+  local stage="${1:-}"
+  local hook_stage_dir="${HOOK_DIR}"
+  
+  # If a stage is specified, look for hooks in a stage-specific subdirectory
+  if [[ -n "${stage}" ]]; then
+    hook_stage_dir="${HOOK_DIR}/${stage}"
+  fi
+  
+  # Check if hook directory exists
+  if [[ ! -d "${hook_stage_dir}" ]]; then
+    return 0
+  fi
+  
+  # Find all executable scripts in the hook directory
+  local hooks
+  readarray -t hooks < <(find "${hook_stage_dir}" -maxdepth 1 -type f -executable 2>/dev/null | sort)
+  
+  if [[ ${#hooks[@]} -eq 0 ]]; then
+    return 0
+  fi
+  
+  local stage_label="${stage:+${stage} }"
+  log "Running ${stage_label}hooks from ${hook_stage_dir}..."
+  
+  for hook in "${hooks[@]}"; do
+    log "  Executing hook: $(basename "${hook}")"
+    if "${hook}"; then
+      log "  Hook $(basename "${hook}") completed successfully"
+    else
+      log "  WARNING: Hook $(basename "${hook}") exited with non-zero status"
+    fi
+  done
+  
+  log "${stage_label}Hooks completed"
+}
+
 run_autoexec() {
   local autoexec="${CONFIG_DIR}/autoexec.sh"
   if [[ -f "${autoexec}" ]] && [[ -x "${autoexec}" ]]; then
@@ -81,7 +119,7 @@ update_game() {
   log "Updating game server (App ID: ${STEAM_APP_ID})..."
   
   # Best-effort ownership fix for mounted volume
-  chown -R "${STEAMCMD_USER}:${STEAMCMD_USER}" "${CONFIG_DIR}" "${GAME_DIR}" \
+  chown -R "${STEAMCMD_USER}:${STEAMCMD_USER}" "${CONFIG_DIR}" "${GAME_DIR}" "${HOOK_DIR}" \
     >/dev/null 2>&1 || true
 
   # Ensure SteamCMD home directory exists and is writable
@@ -159,17 +197,35 @@ main() {
   ensure_dirs
 
   # Best-effort ownership fix for mounted volumes
-  chown -R "${STEAMCMD_USER}:${STEAMCMD_USER}" "${CONFIG_DIR}" "${OVERLAY_DIR}" "${GAME_DIR}" \
+  chown -R "${STEAMCMD_USER}:${STEAMCMD_USER}" "${CONFIG_DIR}" "${OVERLAY_DIR}" "${GAME_DIR}" "${HOOK_DIR}" \
     >/dev/null 2>&1 || true
+
+  # Run pre-autoexec hooks
+  run_hooks "pre-autoexec"
+  
+  # Run hooks from base hook directory (for backward compatibility)
+  run_hooks
 
   # Execute autoexec.sh if it exists
   run_autoexec
 
+  # Run post-autoexec hooks
+  run_hooks "post-autoexec"
+
+  # Run pre-update hooks
+  run_hooks "pre-update"
+
   # Update game if enabled
   update_game
 
+  # Run post-update hooks
+  run_hooks "post-update"
+
   # Setup overlayfs if overlay directory has content
   setup_overlayfs
+
+  # Run pre-server hooks
+  run_hooks "pre-server"
 
   # Run the server
   run_server "$@"
