@@ -15,7 +15,7 @@ on:
         description: "Also push the :latest tag"
         required: true
         type: boolean
-        default: false
+        default: true
       platforms:
         description: "Build platforms (comma-separated)"
         required: true
@@ -56,7 +56,7 @@ jobs:
             # Set this to your preferred repo, or replace with a repo secret if you prefer.
             IMAGE_NAME="${{ vars.DOCKERHUB_IMAGE_NAME }}"
             if [[ -z "${IMAGE_NAME}" ]]; then
-              echo "DOCKERHUB_IMAGE_NAME variable is not set. Create it (e.g., 'lancommander/ut2004') or use workflow_dispatch."
+              echo "DOCKERHUB_IMAGE_NAME variable is not set. Create it (e.g., 'lancommander/steamcmd') or use workflow_dispatch."
               exit 1
             fi
 
