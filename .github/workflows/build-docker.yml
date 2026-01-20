@@ -60,7 +60,7 @@ jobs:
               exit 1
             fi
 
-            PUSH_LATEST="false"
+            PUSH_LATEST="true"
             PLATFORMS="linux/amd64"
           else
             IMAGE_NAME="${{ inputs.image_name }}"
