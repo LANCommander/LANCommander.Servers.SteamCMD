@@ -4,7 +4,6 @@ $ErrorActionPreference = "Stop"
 function Invoke-SteamCmd {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory)] [string] $SteamCmdPath,
         [Parameter(Mandatory)] [string[]] $Arguments
     )
 
@@ -14,7 +13,7 @@ function Invoke-SteamCmd {
 }
 
 function Update-SteamCmd {
-    Invoke-SteamCmd -SteamCmdPath "steamcmd" -Arguments @("+@sSteamCmdForcePlatformType linux", "+quit")
+    Invoke-SteamCmd -Arguments @("+@sSteamCmdForcePlatformType linux", "+quit")
 }
 
 function Install-SteamGame {
@@ -75,8 +74,9 @@ function Install-SteamGame {
 
     $steamCmdArgs += "+quit"
 
-    Invoke-SteamCmd -SteamCmdPath $SteamCmdPath -Arguments $steamCmdArgs
+    Invoke-SteamCmd -Arguments $steamCmdArgs
 }
 
 Export-ModuleMember -Function Install-SteamGame
 Export-ModuleMember -Function Update-SteamCmd
+Export-ModuleMember -Function Invoke-SteamCmd

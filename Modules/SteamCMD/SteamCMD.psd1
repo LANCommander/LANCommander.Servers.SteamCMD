@@ -7,7 +7,7 @@
     Description       = 'Install and update Steam games using SteamCMD'
     PowerShellVersion = '7.0'
 
-    FunctionsToExport = @('Install-SteamGame', 'Update-SteamCmd')
+    FunctionsToExport = @('Install-SteamGame', 'Update-SteamCmd', 'Invoke-SteamCmd')
     CmdletsToExport   = @()
     VariablesToExport = @()
     AliasesToExport   = @()

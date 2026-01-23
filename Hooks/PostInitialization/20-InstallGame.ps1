@@ -19,13 +19,3 @@ Install-SteamGame -InstallRoot "$Env:SERVER_DIR" `
                   -Validate:$([System.Convert]::ToBoolean($Env:STEAM_VALIDATE))
 
 Invoke-Hook "PostSteamInstallGame"
-
-Write-Log "Starting server via SteamCMD"
-Write-Log "--------------------------------"
-Write-Log "Arguments: $Env:STEAMCMD_ARGS"
-
-Invoke-Hook "SteamServerStarted"
-
-Write-Log "Server has stopped"
-
-Invoke-Hook "SteamServerStopped"
