@@ -16,6 +16,8 @@ Install-SteamGame -InstallRoot "$Env:SERVER_DIR" `
                   -AppId $Env:STEAM_APP_ID `
                   -Branch $Env:STEAM_BRANCH `
                   -BranchPassword $Env:STEAM_BRANCH_PASSWORD `
+                  -Username $Env:STEAM_USERNAME `
+                  -Password $Env:STEAM_PASSWORD `
                   -Validate:$([System.Convert]::ToBoolean($Env:STEAM_VALIDATE))
 
 Invoke-Hook "PostSteamInstallGame"
