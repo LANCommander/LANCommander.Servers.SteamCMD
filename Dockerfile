@@ -2,6 +2,8 @@
 
 FROM lancommander/base:latest
 
+USER root
+
 # SteamCMD settings
 ENV STEAM_APP_ID=""
 ENV STEAM_APP_UPDATE="true"
