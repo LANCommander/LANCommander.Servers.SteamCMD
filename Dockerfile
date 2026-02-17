@@ -22,7 +22,6 @@ RUN dpkg --add-architecture i386 && \
     curl \
     tar \
     gzip \
-    gosu \
     lib32gcc-s1 \
     lib32stdc++6 \
     libc6-i386 \
@@ -42,6 +41,8 @@ COPY Modules/ "${BASE_MODULES}/"
 COPY Hooks/ "${BASE_HOOKS}/"
 
 VOLUME ["/config"]
+
+USER lancommander
 
 WORKDIR /config
 ENTRYPOINT ["/usr/local/bin/entrypoint.ps1"]
