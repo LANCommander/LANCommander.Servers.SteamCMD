@@ -15,7 +15,7 @@ on:
         description: "Also push the :latest tag"
         required: true
         type: boolean
-        default: true
+        default: false
       platforms:
         description: "Build platforms (comma-separated)"
         required: true
